@@ -3,1689 +3,429 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MathQuest - Aprende Matemáticas Jugando</title>
+    <title>MathQuest - Plataforma Adaptativa por Edades</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --radius: 20px;
+            --scale: 1;
+            --anim-speed: 0.3s;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Nunito', sans-serif; overflow-x: hidden; }
-
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
-        @keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes slideIn { from{opacity:0;transform:translateX(-30px)} to{opacity:1;transform:translateX(0)} }
-        @keyframes popIn { 0%{transform:scale(0);opacity:0} 60%{transform:scale(1.2)} 100%{transform:scale(1);opacity:1} }
-        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
-        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-        @keyframes confetti { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(-200px) rotate(720deg);opacity:0} }
-        @keyframes glow { 0%,100%{box-shadow:0 0 5px rgba(99,102,241,0.5)} 50%{box-shadow:0 0 20px rgba(99,102,241,0.8)} }
-        @keyframes bounceIn { 0%{transform:scale(0.3);opacity:0} 50%{transform:scale(1.05)} 70%{transform:scale(0.95)} 100%{transform:scale(1);opacity:1} }
-        @keyframes progressBar { from{width:0%} to{width:var(--progress)} }
-        @keyframes starCollect { 0%{transform:scale(1) rotate(0deg);opacity:1} 100%{transform:scale(0) rotate(180deg) translateY(-50px);opacity:0} }
-        @keyframes ripple { 0%{transform:scale(0);opacity:0.6} 100%{transform:scale(4);opacity:0} }
-        @keyframes petWalk { 0%,100%{transform:translateX(0) scaleX(1)} 25%{transform:translateX(20px) scaleX(1)} 50%{transform:translateX(20px) scaleX(-1)} 75%{transform:translateX(0) scaleX(-1)} }
-        @keyframes bgMove { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-        @keyframes sparkle { 0%,100%{opacity:0;transform:scale(0)} 50%{opacity:1;transform:scale(1)} }
-
+        body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); transition: background var(--anim-speed); }
+        
+        /* Animaciones */
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        @keyframes pop { 0%{transform:scale(0.8);opacity:0} 70%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
+        @keyframes slide { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+        @keyframes confetti { 0%{transform:translateY(0) rotate(0);opacity:1} 100%{transform:translateY(-150px) rotate(360deg);opacity:0} }
+        
         .float { animation: float 3s ease-in-out infinite; }
-        .pulse { animation: pulse 2s ease-in-out infinite; }
-        .slide-up { animation: slideUp 0.5s ease-out forwards; }
-        .slide-in { animation: slideIn 0.5s ease-out forwards; }
-        .pop-in { animation: popIn 0.5s ease-out forwards; }
-        .shake { animation: shake 0.5s ease-in-out; }
-        .bounce-in { animation: bounceIn 0.6s ease-out forwards; }
-        .glow { animation: glow 2s ease-in-out infinite; }
+        .pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .slide { animation: slide 0.5s ease-out forwards; }
+        .shake { animation: shake 0.4s ease-in-out; }
+        
+        .card { background: var(--card-bg); border-radius: var(--radius); padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); transition: all 0.3s; }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+        
+        .btn { padding: 12px 20px; border-radius: 12px; border: none; font-family: 'Nunito'; font-weight: 700; cursor: pointer; transition: all 0.2s; transform: scale(var(--scale)); }
+        .btn:active { transform: scale(0.95); }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px var(--primary)40; }
+        .btn-secondary { background: var(--secondary); color: white; }
+        .btn-outline { background: transparent; border: 2px solid #e2e8f0; color: var(--text-muted); }
+        
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+        
+        /* Temas por edad */
+        .theme-4-5 { --primary: #fbbf24; --secondary: #f87171; --bg: #fefce8; --radius: 28px; --scale: 1.15; }
+        .theme-6-7 { --primary: #6366f1; --secondary: #ec4899; --bg: #e0e7ff; --radius: 24px; --scale: 1.05; }
+        .theme-8-9 { --primary: #06b6d4; --secondary: #10b981; --bg: #ecfeff; --radius: 20px; --scale: 1; }
+        .theme-10-12 { --primary: #8b5cf6; --secondary: #f59e0b; --bg: #f5f3ff; --radius: 18px; --scale: 0.95; }
+        .theme-13-14 { --primary: #0f172a; --secondary: #3b82f6; --bg: #f8fafc; --radius: 16px; --scale: 0.9; }
 
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #818cf8, #6366f1); border-radius: 10px; }
-
-        .gradient-bg {
-            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
-            background-size: 400% 400%;
-            animation: bgMove 15s ease infinite;
-        }
-
-        .glass {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        .card-hover {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .card-hover:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        }
-
-        .btn-press {
-            transition: all 0.15s ease;
-        }
-        .btn-press:active {
-            transform: scale(0.95);
-        }
-
-        .dark body { background: #0f172a; color: #e2e8f0; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; opacity: 0.6; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } = React;
+        const { useState, useEffect, useRef, useCallback, useContext, createContext, useMemo } = React;
 
         // ==========================================
-        // SOUND ENGINE
+        // 1. CONFIGURACIÓN POR EDADES & TEMAS
         // ==========================================
-        const SoundEngine = {
-            ctx: null,
-            init() {
-                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const AGE_CONFIG = {
+            '4-5': {
+                label: 'Exploradores',
+                themeClass: 'theme-4-5',
+                colors: { primary: '#fbbf24', secondary: '#f87171', accent: '#86efac' },
+                ui: { fontSize: '18px', btnSize: 'large', icons: 'big', spacing: 'lg' },
+                games: ['counting', 'shapes', 'colors', 'matching'],
+                rewards: { coinName: 'Estrellitas', icon: '⭐', xpMult: 0.8 },
+                description: 'Aprendizaje visual, sonidos y arrastrar/soltar'
             },
-            play(type) {
-                this.init();
-                const c = this.ctx;
-                const o = c.createOscillator();
-                const g = c.createGain();
-                o.connect(g);
-                g.connect(c.destination);
+            '6-7': {
+                label: 'Aventureros',
+                themeClass: 'theme-6-7',
+                colors: { primary: '#6366f1', secondary: '#ec4899', accent: '#a78bfa' },
+                ui: { fontSize: '16px', btnSize: 'medium', icons: 'medium', spacing: 'md' },
+                games: ['addsub', 'sequences', 'memory', 'compare'],
+                rewards: { coinName: 'Gemas', icon: '💎', xpMult: 1.0 },
+                description: 'Sumas, restas, memoria y secuencias'
+            },
+            '8-9': {
+                label: 'Constructores',
+                themeClass: 'theme-8-9',
+                colors: { primary: '#06b6d4', secondary: '#10b981', accent: '#34d399' },
+                ui: { fontSize: '15px', btnSize: 'medium', icons: 'medium', spacing: 'md' },
+                games: ['muldiv', 'problems', 'timed', 'missions'],
+                rewards: { coinName: 'Monedas', icon: '🪙', xpMult: 1.2 },
+                description: 'Multiplicación, división y retos por tiempo'
+            },
+            '10-12': {
+                label: 'Estrategas',
+                themeClass: 'theme-10-12',
+                colors: { primary: '#8b5cf6', secondary: '#f59e0b', accent: '#c084fc' },
+                ui: { fontSize: '14px', btnSize: 'standard', icons: 'standard', spacing: 'sm' },
+                games: ['fractions', 'geometry', 'logic', 'rankings'],
+                rewards: { coinName: 'Puntos', icon: '🏆', xpMult: 1.5 },
+                description: 'Fracciones, geometría y lógica avanzada'
+            },
+            '13-14': {
+                label: 'Maestros',
+                themeClass: 'theme-13-14',
+                colors: { primary: '#0f172a', secondary: '#3b82f6', accent: '#60a5fa' },
+                ui: { fontSize: '13px', btnSize: 'compact', icons: 'standard', spacing: 'sm' },
+                games: ['algebra', 'reasoning', 'advanced', 'stats'],
+                rewards: { coinName: 'Créditos', icon: '🎓', xpMult: 1.8 },
+                description: 'Álgebra, razonamiento y estadísticas'
+            }
+        };
+
+        // ==========================================
+        // 2. MOTOR ADAPTATIVO (IA Simulada)
+        // ==========================================
+        const AdaptiveEngine = {
+            track(sessionHistory, currentDifficulty, accuracy, speed) {
+                if (sessionHistory.length < 3) return currentDifficulty;
+                const last3 = sessionHistory.slice(-3);
+                const avgAccuracy = last3.reduce((a,b) => a + (b.correct ? 1 : 0), 0) / 3;
+                const avgSpeed = last3.reduce((a,b) => a + b.time, 0) / 3;
+
+                if (avgAccuracy >= 0.85 && avgSpeed < 4) return Math.min(10, currentDifficulty + 1);
+                if (avgAccuracy <= 0.5 || avgSpeed > 12) return Math.max(1, currentDifficulty - 1);
+                return currentDifficulty;
+            },
+            generateNext(ageGroup, difficulty, lastPerformance) {
+                // Ajusta probabilidad de temas según rendimiento histórico
+                const weights = { ...lastPerformance?.weights || {} };
+                const weakAreas = Object.entries(weights).filter(([k,v]) => v < 0.6).map(x => x[0]);
+                const nextType = weakAreas.length > 0 && Math.random() > 0.3 ? weakAreas[0] : AGE_CONFIG[ageGroup].games[Math.floor(Math.random() * AGE_CONFIG[ageGroup].games.length)];
+                return { type: nextType, difficulty: difficulty, adaptive: true };
+            }
+        };
+
+        // ==========================================
+        // 3. GENERADORES DE EJERCICIOS POR EDAD
+        // ==========================================
+        const QuestionGenerator = {
+            'counting': (d) => {
+                const count = Math.floor(Math.random() * (d <= 2 ? 5 : 10)) + 1;
+                const items = ['🍎', '🐶', '🌟', '🚗', '🎈'];
+                const item = items[Math.floor(Math.random() * items.length)];
+                const display = Array(count).fill(item).join(' ');
+                return { q: `¿Cuántos ${item} hay?`, visual: display, ans: count, opts: [count-1, count, count+1, count+2].filter(x => x > 0).sort(() => Math.random()-0.5) };
+            },
+            'shapes': (d) => {
+                const shapes = [{name: 'Círculo', icon: '⭕'}, {name: 'Cuadrado', icon: '🟦'}, {name: 'Triángulo', icon: '🔺'}, {name: 'Estrella', icon: '⭐'}];
+                const target = shapes[Math.floor(Math.random() * shapes.length)];
+                return { q: 'Toca la figura correcta:', visual: `Busca: ${target.icon}`, ans: target.name, opts: shapes.map(s => s.name) };
+            },
+            'colors': (d) => {
+                const colors = ['Rojo', 'Azul', 'Verde', 'Amarillo'];
+                const target = colors[Math.floor(Math.random() * colors.length)];
+                const hex = {Rojo:'#ef4444', Azul:'#3b82f6', Verde:'#22c55e', Amarillo:'#eab308'}[target];
+                return { q: `¿De qué color es este bloque?`, visual: `<div style="width:60px;height:60px;background:${hex};border-radius:12px;display:inline-block"></div>`, ans: target, opts: colors };
+            },
+            'addsub': (d) => {
+                const max = d <= 2 ? 10 : 20;
+                const isAdd = Math.random() > 0.5;
+                const a = Math.floor(Math.random() * max) + 1;
+                const b = Math.floor(Math.random() * (isAdd ? max - a : a)) + 1;
+                return { q: `${a} ${isAdd ? '+' : '-'} ${b} = ?`, visual: '', ans: isAdd ? a+b : a-b, opts: [isAdd?a+b+1:a-b-2, isAdd?a+b:a-b, isAdd?a+b-1:a-b+1, isAdd?a+b+2:a-b-2].filter(x=>x>=0) };
+            },
+            'muldiv': (d) => {
+                const max = d <= 3 ? 5 : 10;
+                const a = Math.floor(Math.random() * max) + 2;
+                const b = Math.floor(Math.random() * max) + 2;
+                return { q: `${a} × ${b} = ?`, visual: '', ans: a*b, opts: [a*b, a*b-1, a*b+2, a*b-3].filter(x=>x>0) };
+            },
+            'fractions': (d) => {
+                const num = Math.floor(Math.random()*3)+1;
+                const den = num + Math.floor(Math.random()*3)+2;
+                return { q: `¿Qué fracción representa ${num} de ${den} partes?`, visual: `🟨🟨🟦`.repeat(num) + '🟦'.repeat(den-num), ans: `${num}/${den}`, opts: [`${num}/${den}`, `${num+1}/${den}`, `${num}/${den-1}`, `${den}/${num}`] };
+            },
+            'algebra': (d) => {
+                const x = Math.floor(Math.random()*10)+1;
+                const c = Math.floor(Math.random()*20)+5;
+                return { q: `Si 2x + ${c} = ${2*x+c}, ¿cuánto vale x?`, visual: '', ans: x, opts: [x, x-1, x+2, Math.floor((2*x+c)/2)] };
+            },
+            // Fallback genérico para otros tipos
+            default: (d) => {
+                const ops = ['+','-','×','÷'];
+                const op = ops[Math.floor(Math.random()*4)];
+                const a = Math.floor(Math.random()*12)+2;
+                const b = Math.floor(Math.random()*10)+2;
+                let ans;
+                switch(op){
+                    case '+': ans=a+b; break;
+                    case '-': ans=Math.abs(a-b); break;
+                    case '×': ans=a*b; break;
+                    case '÷': ans=b; break; // a/b simplificado
+                }
+                return { q: `${a} ${op} ${b} = ?`, visual: '', ans, opts: [ans, ans-1, ans+2, ans+5] };
+            }
+        };
+
+        // ==========================================
+        // 4. COMPONENTES PRINCIPALES
+        // ==========================================
+        function SoundEngine() {
+            const ctx = useRef(null);
+            const play = (type) => {
+                if(!ctx.current) ctx.current = new (window.AudioContext || window.webkitAudioContext)();
+                const c = ctx.current, o = c.createOscillator(), g = c.createGain();
+                o.connect(g); g.connect(c.destination);
                 const now = c.currentTime;
-                switch(type) {
-                    case 'correct':
-                        o.frequency.setValueAtTime(523.25, now);
-                        o.frequency.setValueAtTime(659.25, now + 0.1);
-                        o.frequency.setValueAtTime(783.99, now + 0.2);
-                        g.gain.setValueAtTime(0.3, now);
-                        g.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-                        o.start(now); o.stop(now + 0.4);
-                        break;
-                    case 'wrong':
-                        o.type = 'sawtooth';
-                        o.frequency.setValueAtTime(200, now);
-                        o.frequency.setValueAtTime(150, now + 0.15);
-                        g.gain.setValueAtTime(0.2, now);
-                        g.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                        o.start(now); o.stop(now + 0.3);
-                        break;
-                    case 'click':
-                        o.frequency.setValueAtTime(800, now);
-                        g.gain.setValueAtTime(0.15, now);
-                        g.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                        o.start(now); o.stop(now + 0.1);
-                        break;
-                    case 'levelup':
-                        [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
-                            const o2 = c.createOscillator();
-                            const g2 = c.createGain();
-                            o2.connect(g2); g2.connect(c.destination);
-                            o2.frequency.setValueAtTime(f, now + i*0.15);
-                            g2.gain.setValueAtTime(0.25, now + i*0.15);
-                            g2.gain.exponentialRampToValueAtTime(0.01, now + i*0.15 + 0.3);
-                            o2.start(now + i*0.15); o2.stop(now + i*0.15 + 0.3);
-                        });
-                        break;
-                    case 'coin':
-                        o.frequency.setValueAtTime(1200, now);
-                        o.frequency.setValueAtTime(1600, now + 0.05);
-                        g.gain.setValueAtTime(0.2, now);
-                        g.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                        o.start(now); o.stop(now + 0.15);
-                        break;
-                    case 'star':
-                        [880, 1100, 1320].forEach((f, i) => {
-                            const o2 = c.createOscillator();
-                            const g2 = c.createGain();
-                            o2.connect(g2); g2.connect(c.destination);
-                            o2.type = 'sine';
-                            o2.frequency.setValueAtTime(f, now + i*0.08);
-                            g2.gain.setValueAtTime(0.15, now + i*0.08);
-                            g2.gain.exponentialRampToValueAtTime(0.01, now + i*0.08 + 0.2);
-                            o2.start(now + i*0.08); o2.stop(now + i*0.08 + 0.2);
-                        });
-                        break;
-                }
-            }
-        };
-
-        // ==========================================
-        // CONTEXT
-        // ==========================================
-        const AppContext = createContext();
-
-        // ==========================================
-        // UTILITIES
-        // ==========================================
-        const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-        const pick = arr => arr[rand(0, arr.length - 1)];
-
-        const MATH_TYPES = [
-            { id: 'suma', label: 'Suma', icon: '➕', color: '#6366f1' },
-            { id: 'resta', label: 'Resta', icon: '➖', color: '#ec4899' },
-            { id: 'multiplicacion', label: 'Multiplicación', icon: '✖️', color: '#f59e0b' },
-            { id: 'division', label: 'División', icon: '➗', color: '#10b981' },
-            { id: 'logica', label: 'Lógica', icon: '🧠', color: '#8b5cf6' },
-            { id: 'patrones', label: 'Patrones', icon: '🔢', color: '#06b6d4' },
-            { id: 'problemas', label: 'Problemas', icon: '📝', color: '#f97316' },
-            { id: 'geometria', label: 'Geometría', icon: '📐', color: '#84cc16' },
-        ];
-
-        const ACHIEVEMENTS = [
-            { id: 'first_correct', name: 'Primer Acierto', icon: '🎯', desc: 'Responde tu primera pregunta', condition: (s) => s.totalCorrect >= 1 },
-            { id: 'streak_5', name: 'Racha de 5', icon: '🔥', desc: '5 respuestas correctas seguidas', condition: (s) => s.bestStreak >= 5 },
-            { id: 'streak_10', name: 'Racha de 10', icon: '⚡', desc: '10 respuestas correctas seguidas', condition: (s) => s.bestStreak >= 10 },
-            { id: 'coins_100', name: 'Ahorrador', icon: '💰', desc: 'Acumula 100 monedas', condition: (s) => s.totalCoins >= 100 },
-            { id: 'level_5', name: 'Nivel 5', icon: '⭐', desc: 'Alcanza el nivel 5', condition: (s) => s.level >= 5 },
-            { id: 'level_10', name: 'Nivel 10', icon: '🌟', desc: 'Alcanza el nivel 10', condition: (s) => s.level >= 10 },
-            { id: 'all_types', name: 'Explorador', icon: '🗺️', desc: 'Practica todos los tipos', condition: (s) => s.typesPracticed && s.typesPracticed.size >= 8 },
-            { id: 'speed_3', name: 'Velocista', icon: '💨', desc: 'Responde en menos de 3 segundos', condition: (s) => s.fastAnswers >= 5 },
-            { id: 'perfect_session', name: 'Sesión Perfecta', icon: '💎', desc: '100% en una sesión', condition: (s) => s.perfectSessions >= 1 },
-            { id: 'total_50', name: 'Centenario', icon: '🎖️', desc: '50 respuestas correctas', condition: (s) => s.totalCorrect >= 50 },
-        ];
-
-        const PETS = [
-            { id: 'robot', name: 'Robi', icon: '🤖', color: '#6366f1', unlockLevel: 1 },
-            { id: 'cat', name: 'Michi', icon: '🐱', color: '#ec4899', unlockLevel: 3 },
-            { id: 'dragon', name: 'Drago', icon: '🐉', color: '#f59e0b', unlockLevel: 5 },
-            { id: 'unicorn', name: 'Uni', icon: '🦄', color: '#a855f7', unlockLevel: 8 },
-            { id: 'alien', name: 'Zorp', icon: '👽', color: '#06b6d4', unlockLevel: 12 },
-        ];
-
-        const AVATAR_ITEMS = {
-            hair: [
-                { id: 'hair1', icon: '👦', name: 'Clásico' },
-                { id: 'hair2', icon: '👧', name: 'Largo' },
-                { id: 'hair3', icon: '🧑', name: 'Corto' },
-                { id: 'hair4', icon: '👩‍🦱', name: 'Rizado' },
-            ],
-            color: [
-                { id: 'blue', color: '#3b82f6', name: 'Azul' },
-                { id: 'pink', color: '#ec4899', name: 'Rosa' },
-                { id: 'green', color: '#22c55e', name: 'Verde' },
-                { id: 'purple', color: '#8b5cf6', name: 'Morado' },
-                { id: 'orange', color: '#f97316', name: 'Naranja' },
-                { id: 'red', color: '#ef4444', name: 'Rojo' },
-            ],
-            accessory: [
-                { id: 'none', icon: '😊', name: 'Ninguno' },
-                { id: 'glasses', icon: '🤓', name: 'Lentes' },
-                { id: 'crown', icon: '👑', name: 'Corona' },
-                { id: 'hat', icon: '🎩', name: 'Sombrero' },
-            ]
-        };
-
-        // ==========================================
-        // MATH PROBLEM GENERATOR
-        // ==========================================
-        function generateProblem(type, difficulty) {
-            const d = difficulty;
-            let question, answer, options;
-
-            switch(type) {
-                case 'suma': {
-                    const max = d <= 2 ? 10 : d <= 4 ? 50 : d <= 6 ? 100 : d <= 8 ? 500 : 1000;
-                    const a = rand(1, max);
-                    const b = rand(1, max);
-                    answer = a + b;
-                    question = `${a} + ${b} = ?`;
-                    break;
-                }
-                case 'resta': {
-                    const max = d <= 2 ? 10 : d <= 4 ? 50 : d <= 6 ? 100 : d <= 8 ? 500 : 1000;
-                    const a = rand(1, max);
-                    const b = rand(1, Math.min(a, max));
-                    answer = a - b;
-                    question = `${a} - ${b} = ?`;
-                    break;
-                }
-                case 'multiplicacion': {
-                    const max = d <= 2 ? 5 : d <= 4 ? 10 : d <= 6 ? 12 : d <= 8 ? 15 : 25;
-                    const a = rand(2, max);
-                    const b = rand(2, max);
-                    answer = a * b;
-                    question = `${a} × ${b} = ?`;
-                    break;
-                }
-                case 'division': {
-                    const max = d <= 2 ? 5 : d <= 4 ? 10 : d <= 6 ? 12 : d <= 8 ? 15 : 25;
-                    const b = rand(2, max);
-                    answer = rand(2, max);
-                    const a = b * answer;
-                    question = `${a} ÷ ${b} = ?`;
-                    break;
-                }
-                case 'logica': {
-                    const templates = [
-                        () => { const a = rand(2,10); const b = rand(2,10); answer = a + b + rand(1,5); question = `Si ${a} + ${b} = ${a+b}, ¿cuánto es ${a} + ${b} + ${answer - a - b}?`; },
-                        () => { const n = rand(3,9); answer = n * 2; question = `Un número multiplicado por 2 da ${answer}. ¿Cuál es el número?`; },
-                        () => { const a = rand(10,50); const b = rand(1,9); answer = a + b; question = `¿Qué número sigue después de ${a} si sumamos ${b}?`; },
-                        () => { const seq = [rand(1,5)]; for(let i=1;i<4;i++) seq.push(seq[i-1]+rand(2,5)); answer = seq[3]+(seq[1]-seq[0]); question = `¿Qué sigue en la secuencia: ${seq.join(', ')} ...?`; },
-                    ];
-                    pick(templates)();
-                    break;
-                }
-                case 'patrones': {
-                    const start = rand(1, 10);
-                    const step = rand(2, 5);
-                    const seq = Array.from({length: 5}, (_, i) => start + step * i);
-                    answer = start + step * 5;
-                    question = `¿Qué sigue en el patrón? ${seq.join(', ')}, ?`;
-                    break;
-                }
-                case 'problemas': {
-                    const names = ['Ana', 'Luis', 'María', 'Pedro', 'Sofía', 'Carlos', 'Elena', 'Diego'];
-                    const items = ['manzanas', 'lápices', 'caramelos', 'galletas', 'libros', 'juguetes', 'estrellas'];
-                    const name = pick(names);
-                    const item = pick(items);
-                    const scenarios = [
-                        () => { const a = rand(3,15); const b = rand(2,10); answer = a + b; question = `${name} tiene ${a} ${item} y recibe ${b} más. ¿Cuántos tiene ahora?`; },
-                        () => { const a = rand(10,25); const b = rand(1, a-1); answer = a - b; question = `${name} tenía ${a} ${item} y regaló ${b}. ¿Cuántos le quedan?`; },
-                        () => { const a = rand(2,8); const b = rand(2,5); answer = a * b; question = `${name} tiene ${a} cajas con ${b} ${item} cada una. ¿Cuántos tiene en total?`; },
-                    ];
-                    pick(scenarios)();
-                    break;
-                }
-                case 'geometria': {
-                    const geoQuestions = [
-                        () => { const s = rand(2,10); answer = s * 4; question = `¿Cuál es el perímetro de un cuadrado de lado ${s}?`; },
-                        () => { const l = rand(2,8); const w = rand(2,8); answer = l * w; question = `¿Cuál es el área de un rectángulo de ${l} × ${w}?`; },
-                        () => { const sides = pick([3,4,5,6,8]); answer = sides; question = `¿Cuántos lados tiene un ${sides===3?'triángulo':sides===4?'cuadrado':sides===5?'pentágono':sides===6?'hexágono':'octágono'}?`; },
-                        () => { const angles = [3,4]; const n = pick(angles); answer = n; question = `¿Cuántos ángulos tiene un ${n===3?'triángulo':'cuadrado'}?`; },
-                    ];
-                    pick(geoQuestions)();
-                    break;
-                }
-            }
-
-            // Generate wrong options
-            options = [answer];
-            while (options.length < 4) {
-                let wrong = answer + rand(-Math.max(5, Math.floor(answer * 0.3)), Math.max(5, Math.floor(answer * 0.3)));
-                if (wrong < 0) wrong = rand(0, answer + 5);
-                if (!options.includes(wrong) && wrong !== answer) options.push(wrong);
-            }
-            options.sort(() => Math.random() - 0.5);
-
-            return { question, answer, options, type };
-        }
-
-        // ==========================================
-        // CONFETTI COMPONENT
-        // ==========================================
-        function Confetti({ active }) {
-            if (!active) return null;
-            const pieces = Array.from({ length: 50 }, (_, i) => ({
-                id: i,
-                x: rand(0, 100),
-                color: pick(['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#8b5cf6', '#ef4444', '#06b6d4']),
-                delay: Math.random() * 0.5,
-                size: rand(6, 14),
-            }));
-            return (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 9999 }}>
-                    {pieces.map(p => (
-                        <div key={p.id} style={{
-                            position: 'absolute', left: `${p.x}%`, top: '-10px',
-                            width: p.size, height: p.size, backgroundColor: p.color,
-                            borderRadius: rand(0,1) ? '50%' : '2px',
-                            animation: `confetti ${1 + Math.random()}s ease-out ${p.delay}s forwards`,
-                        }} />
-                    ))}
-                </div>
-            );
-        }
-
-        // ==========================================
-        // FLOATING PARTICLES
-        // ==========================================
-        function FloatingParticles({ count = 15 }) {
-            const particles = useMemo(() => Array.from({ length: count }, (_, i) => ({
-                id: i,
-                x: rand(0, 100),
-                y: rand(0, 100),
-                size: rand(4, 20),
-                duration: rand(10, 25),
-                delay: Math.random() * 5,
-                opacity: 0.1 + Math.random() * 0.2,
-            })), []);
-            return (
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
-                    {particles.map(p => (
-                        <div key={p.id} style={{
-                            position: 'absolute', left: `${p.x}%`, top: `${p.y}%`,
-                            width: p.size, height: p.size,
-                            borderRadius: '50%',
-                            background: `linear-gradient(135deg, #667eea, #764ba2)`,
-                            opacity: p.opacity,
-                            animation: `float ${p.duration}s ease-in-out ${p.delay}s infinite`,
-                        }} />
-                    ))}
-                </div>
-            );
-        }
-
-        // ==========================================
-        // PROGRESS BAR
-        // ==========================================
-        function ProgressBar({ value, max, color = '#6366f1', height = 12, showLabel = true }) {
-            const pct = Math.min(100, (value / max) * 100);
-            return (
-                <div style={{ width: '100%' }}>
-                    {showLabel && <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4, fontSize: 12, fontWeight: 700, color: '#64748b' }}>
-                        <span>{value} / {max}</span><span>{Math.round(pct)}%</span>
-                    </div>}
-                    <div style={{ width: '100%', height, background: '#e2e8f0', borderRadius: height/2, overflow: 'hidden' }}>
-                        <div style={{
-                            width: `${pct}%`, height: '100%',
-                            background: `linear-gradient(90deg, ${color}, ${color}dd)`,
-                            borderRadius: height/2,
-                            transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-                            boxShadow: `0 2px 8px ${color}40`,
-                        }} />
-                    </div>
-                </div>
-            );
-        }
-
-        // ==========================================
-        // XP RING
-        // ==========================================
-        function XPRing({ level, xp, xpToNext, size = 80 }) {
-            const pct = xp / xpToNext;
-            const r = (size - 8) / 2;
-            const circ = 2 * Math.PI * r;
-            const offset = circ * (1 - pct);
-            return (
-                <div style={{ position: 'relative', width: size, height: size }}>
-                    <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-                        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#e2e8f0" strokeWidth={6} />
-                        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="url(#xpGrad)" strokeWidth={6}
-                            strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
-                            style={{ transition: 'stroke-dashoffset 0.8s ease' }} />
-                        <defs><linearGradient id="xpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stopColor="#6366f1" /><stop offset="100%" stopColor="#a855f7" />
-                        </linearGradient></defs>
-                    </svg>
-                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-                        <span style={{ fontSize: size * 0.28, fontWeight: 900, color: '#6366f1' }}>{level}</span>
-                        <span style={{ fontSize: size * 0.12, fontWeight: 700, color: '#94a3b8' }}>Nivel</span>
-                    </div>
-                </div>
-            );
-        }
-
-        // ==========================================
-        // PET COMPONENT
-        // ==========================================
-        function PetDisplay({ pet, mood = 'happy', size = 80 }) {
-            const moods = {
-                happy: ['😊', '😄', '🥰'],
-                excited: ['🤩', '😆', '✨'],
-                thinking: ['🤔', '💭', '🧐'],
-                sad: ['😢', '😿', '💧'],
-                sleeping: ['😴', '💤', '🌙'],
+                if(type==='correct') { o.frequency.setValueAtTime(523.25, now); o.frequency.setValueAtTime(783.99, now+0.1); g.gain.setValueAtTime(0.2,now); g.gain.exponentialRampToValueAtTime(0.01,now+0.2); o.start(now); o.stop(now+0.2); }
+                else if(type==='wrong') { o.type='sawtooth'; o.frequency.setValueAtTime(200,now); g.gain.setValueAtTime(0.15,now); g.gain.exponentialRampToValueAtTime(0.01,now+0.2); o.start(now); o.stop(now+0.2); }
+                else if(type==='click') { o.frequency.setValueAtTime(800,now); g.gain.setValueAtTime(0.1,now); g.gain.exponentialRampToValueAtTime(0.01,now+0.1); o.start(now); o.stop(now+0.1); }
             };
+            return { play };
+        }
+
+        function App() {
+            const [user, setUser] = useState(null);
+            const [screen, setScreen] = useState('login');
+            const [ageGroup, setAgeGroup] = useState(null);
+            const [stats, setStats] = useState({ xp:0, coins:0, level:1, accuracy:0, streak:0, history:[], typeStats:{} });
+            const [difficulty, setDifficulty] = useState(1);
+            const [theme, setTheme] = useState('');
+            const sound = useRef(SoundEngine()).current;
+
+            // Cargar datos
+            useEffect(() => {
+                const saved = localStorage.getItem('mq_data');
+                if(saved) {
+                    const d = JSON.parse(saved);
+                    if(d.user) { setUser(d.user); setAgeGroup(d.ageGroup); setTheme(AGE_CONFIG[d.ageGroup]?.themeClass || ''); setStats(d.stats); setDifficulty(d.difficulty || 1); }
+                }
+            }, []);
+
+            // Guardar
+            useEffect(() => { if(user) localStorage.setItem('mq_data', JSON.stringify({ user, ageGroup, stats, difficulty })); }, [user, ageGroup, stats, difficulty]);
+
+            const handleLogin = (name, age) => {
+                sound.play('click');
+                let group = age <= 5 ? '4-5' : age <= 7 ? '6-7' : age <= 9 ? '8-9' : age <= 12 ? '10-12' : '13-14';
+                setUser({ name, age, group });
+                setAgeGroup(group);
+                setTheme(AGE_CONFIG[group].themeClass);
+                setScreen('dashboard');
+            };
+
+            const finishSession = (correct, total, time, type) => {
+                const acc = correct/total;
+                sound.play(acc >= 0.7 ? 'correct' : 'wrong');
+                const cfg = AGE_CONFIG[ageGroup];
+                const xpGain = Math.round(correct * 10 * cfg.rewards.xpMult);
+                const coinsGain = Math.round(correct * 3);
+                const newDiff = AdaptiveEngine.track(stats.history, difficulty, acc, time/correct);
+                setDifficulty(newDiff);
+                setStats(s => ({
+                    ...s,
+                    xp: s.xp + xpGain,
+                    coins: s.coins + coinsGain,
+                    level: Math.floor((s.xp + xpGain) / 100) + 1,
+                    accuracy: s.history.length === 0 ? acc : (s.accuracy * s.history.length + acc) / (s.history.length + 1),
+                    streak: acc >= 0.8 ? s.streak + 1 : 0,
+                    history: [...s.history.slice(-9), { correct: acc >= 0.8, time }],
+                    typeStats: { ...s.typeStats, [type]: { correct: (s.typeStats[type]?.correct||0)+correct, total: (s.typeStats[type]?.total||0)+total } }
+                }));
+                setScreen('dashboard');
+            };
+
             return (
-                <div style={{ width: size, height: size, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: size * 0.7, animation: 'float 3s ease-in-out infinite' }}>
-                    {pet.icon}
+                <div className={theme}>
+                    {screen === 'login' && <LoginScreen onStart={handleLogin} />}
+                    {screen === 'dashboard' && <Dashboard user={user} ageGroup={ageGroup} stats={stats} onPlay={() => setScreen('game')} onTheme={theme} onLogout={() => {localStorage.removeItem('mq_data'); setUser(null); setScreen('login');}} />}
+                    {screen === 'game' && <GameSession ageGroup={ageGroup} difficulty={difficulty} stats={stats} onFinish={finishSession} sound={sound} />}
                 </div>
             );
         }
 
-        // ==========================================
-        // LOGIN SCREEN
-        // ==========================================
-        function LoginScreen({ onLogin }) {
-            const [isParent, setIsParent] = useState(false);
+        function LoginScreen({ onStart }) {
             const [name, setName] = useState('');
-            const [parentCode, setParentCode] = useState('');
-            const [show, setShow] = useState(false);
-
-            useEffect(() => { setTimeout(() => setShow(true), 100); }, []);
-
-            const handleLogin = () => {
-                if (!name.trim()) return;
-                SoundEngine.play('click');
-                onLogin({ name: name.trim(), isParent });
-            };
-
+            const [age, setAge] = useState('');
             return (
-                <div className="gradient-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, position: 'relative', overflow: 'hidden' }}>
-                    <FloatingParticles count={20} />
-                    <div style={{
-                        maxWidth: 500, width: '100%', position: 'relative', zIndex: 1,
-                        opacity: show ? 1 : 0, transform: show ? 'translateY(0)' : 'translateY(30px)',
-                        transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-                    }}>
-                        <div style={{ textAlign: 'center', marginBottom: 30 }}>
-                            <div style={{ fontSize: 60, marginBottom: 10, animation: 'float 3s ease-in-out infinite' }}>🎓</div>
-                            <h1 style={{ fontSize: 42, fontWeight: 900, color: '#fff', textShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
-                                Math<span style={{ color: '#fbbf24' }}>Quest</span>
-                            </h1>
-                            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 18, fontWeight: 600, marginTop: 8 }}>
-                                ¡Aprende matemáticas jugando! 🚀
-                            </p>
-                        </div>
-
-                        <div className="glass" style={{
-                            borderRadius: 24, padding: '32px 28px',
-                            background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)',
-                            boxShadow: '0 25px 60px rgba(0,0,0,0.15)',
-                        }}>
-                            <div style={{ display: 'flex', gap: 8, marginBottom: 24, background: '#f1f5f9', borderRadius: 16, padding: 4 }}>
-                                <button onClick={() => { setIsParent(false); SoundEngine.play('click'); }}
-                                    style={{ flex: 1, padding: '12px 16px', borderRadius: 12, border: 'none',
-                                        background: !isParent ? '#fff' : 'transparent', color: !isParent ? '#6366f1' : '#94a3b8',
-                                        fontWeight: 700, fontSize: 14, cursor: 'pointer', transition: 'all 0.3s',
-                                        boxShadow: !isParent ? '0 2px 8px rgba(0,0,0,0.1)' : 'none' }}>
-                                    👦 Soy Alumno
-                                </button>
-                                <button onClick={() => { setIsParent(true); SoundEngine.play('click'); }}
-                                    style={{ flex: 1, padding: '12px 16px', borderRadius: 12, border: 'none',
-                                        background: isParent ? '#fff' : 'transparent', color: isParent ? '#6366f1' : '#94a3b8',
-                                        fontWeight: 700, fontSize: 14, cursor: 'pointer', transition: 'all 0.3s',
-                                        boxShadow: isParent ? '0 2px 8px rgba(0,0,0,0.1)' : 'none' }}>
-                                    👨‍👩‍👧 Soy Padre
-                                </button>
-                            </div>
-
-                            <input type="text" placeholder={isParent ? "Nombre del padre/madre" : "¿Cómo te llamas?"}
-                                value={name} onChange={e => setName(e.target.value)}
-                                onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                                style={{ width: '100%', padding: '14px 18px', borderRadius: 14, border: '2px solid #e2e8f0',
-                                    fontSize: 16, fontWeight: 600, fontFamily: 'Nunito', outline: 'none', marginBottom: 16,
-                                    transition: 'border-color 0.3s', background: '#f8fafc' }}
-                                onFocus={e => e.target.style.borderColor = '#6366f1'}
-                                onBlur={e => e.target.style.borderColor = '#e2e8f0'} />
-
-                            {isParent && (
-                                <input type="password" placeholder="Código de familia" value={parentCode}
-                                    onChange={e => setParentCode(e.target.value)}
-                                    style={{ width: '100%', padding: '14px 18px', borderRadius: 14, border: '2px solid #e2e8f0',
-                                        fontSize: 16, fontWeight: 600, fontFamily: 'Nunito', outline: 'none', marginBottom: 16,
-                                        background: '#f8fafc' }} />
-                            )}
-
-                            <button onClick={handleLogin} className="btn-press"
-                                style={{ width: '100%', padding: '16px', borderRadius: 16, border: 'none',
-                                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff',
-                                    fontSize: 18, fontWeight: 800, cursor: 'pointer', fontFamily: 'Nunito',
-                                    boxShadow: '0 8px 25px rgba(99,102,241,0.4)', transition: 'all 0.3s',
-                                    transform: name.trim() ? 'scale(1)' : 'scale(0.98)',
-                                    opacity: name.trim() ? 1 : 0.6 }}>
-                                🚀 ¡Comenzar!
-                            </button>
-
-                            <p style={{ textAlign: 'center', marginTop: 16, fontSize: 12, color: '#94a3b8' }}>
-                                ✨ ¡Más de 10,000 niños ya aprenden con MathQuest!
-                            </p>
-                        </div>
-
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginTop: 24, opacity: 0.8 }}>
-                            {['🏆 Rankings', '🎮 Minijuegos', '🐾 Mascotas', '📊 Progreso'].map(t => (
-                                <span key={t} style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{t}</span>
-                            ))}
-                        </div>
+                <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'linear-gradient(135deg, #667eea, #764ba2)', padding:20}}>
+                    <div className="card" style={{maxWidth:400, width:'100%', textAlign:'center'}}>
+                        <div className="float" style={{fontSize:64, marginBottom:10}}>🎓</div>
+                        <h1 style={{fontSize:32, fontWeight:900, marginBottom:8}}>MathQuest</h1>
+                        <p style={{color:'#64748b', marginBottom:20}}>Aprende matemáticas adaptadas a tu edad</p>
+                        <input placeholder="Tu nombre" value={name} onChange={e=>setName(e.target.value)} style={{width:'100%', padding:'14px', borderRadius:12, border:'2px solid #e2e8f0', fontSize:16, fontFamily:'Nunito', marginBottom:12}} />
+                        <input type="number" placeholder="Tu edad (4-14)" value={age} onChange={e=>setAge(e.target.value)} min="4" max="14" style={{width:'100%', padding:'14px', borderRadius:12, border:'2px solid #e2e8f0', fontSize:16, fontFamily:'Nunito', marginBottom:16}} />
+                        <button onClick={()=> name && age>=4 && age<=14 && onStart(name, parseInt(age))} className="btn btn-primary" style={{width:'100%', fontSize:18, opacity: name&&age>=4&&age<=14?1:0.5}}>
+                            🚀 ¡Empezar aventura!
+                        </button>
                     </div>
                 </div>
             );
         }
 
-        // ==========================================
-        // AVATAR CUSTOMIZATION
-        // ==========================================
-        function AvatarCustomizer({ avatar, onSave, onClose }) {
-            const [selected, setSelected] = useState({ ...avatar });
-
+        function Dashboard({ user, ageGroup, stats, onPlay, theme, onLogout }) {
+            const cfg = AGE_CONFIG[ageGroup];
             return (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000, padding: 20,
-                }} onClick={onClose}>
-                    <div style={{
-                        background: '#fff', borderRadius: 24, padding: 28, maxWidth: 420, width: '100%',
-                        maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.2)',
-                    }} onClick={e => e.stopPropagation()}>
-                        <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 20, textAlign: 'center' }}>🎨 Personalizar Avatar</h2>
-
-                        <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                            <div style={{
-                                width: 100, height: 100, borderRadius: '50%', margin: '0 auto',
-                                background: selected.color || '#3b82f6',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 50, boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
-                            }}>
-                                {AVATAR_ITEMS.hair.find(h => h.id === selected.hair)?.icon || '😊'}
-                            </div>
+                <div style={{maxWidth:800, margin:'0 auto', padding:'20px 16px 60px'}}>
+                    <header style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24}}>
+                        <div>
+                            <h1 style={{fontSize:28, fontWeight:900}}>¡Hola, {user.name}! 👋</h1>
+                            <span style={{background:cfg.colors.primary, color:'#fff', padding:'4px 12px', borderRadius:20, fontSize:12, fontWeight:700}}>{cfg.label} ({ageGroup})</span>
                         </div>
-
-                        {Object.entries(AVATAR_ITEMS).map(([category, items]) => (
-                            <div key={category} style={{ marginBottom: 20 }}>
-                                <h3 style={{ fontSize: 14, fontWeight: 700, color: '#64748b', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>
-                                    {category === 'hair' ? '👤 Apariencia' : category === 'color' ? '🎨 Color' : '🎭 Accesorio'}
-                                </h3>
-                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                    {items.map(item => (
-                                        <button key={item.id} className="btn-press"
-                                            onClick={() => {
-                                                setSelected(s => ({ ...s, [category]: item.id }));
-                                                SoundEngine.play('click');
-                                            }}
-                                            style={{
-                                                padding: '10px 14px', borderRadius: 12, border: '2px solid',
-                                                borderColor: selected[category] === item.id ? '#6366f1' : '#e2e8f0',
-                                                background: selected[category] === item.id ? '#ede9fe' : '#fff',
-                                                cursor: 'pointer', fontWeight: 700, fontSize: 13,
-                                                fontFamily: 'Nunito', transition: 'all 0.2s',
-                                                color: '#475569',
-                                            }}>
-                                            {item.icon || ''} {item.name}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
-
-                        <div style={{ display: 'flex', gap: 10 }}>
-                            <button onClick={onClose} style={{
-                                flex: 1, padding: '14px', borderRadius: 14, border: '2px solid #e2e8f0',
-                                background: '#fff', color: '#64748b', fontWeight: 700, fontSize: 15,
-                                cursor: 'pointer', fontFamily: 'Nunito',
-                            }}>Cancelar</button>
-                            <button onClick={() => { onSave(selected); SoundEngine.play('correct'); onClose(); }}
-                                className="btn-press"
-                                style={{
-                                    flex: 2, padding: '14px', borderRadius: 14, border: 'none',
-                                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                    color: '#fff', fontWeight: 700, fontSize: 15,
-                                    cursor: 'pointer', fontFamily: 'Nunito',
-                                    boxShadow: '0 4px 15px rgba(99,102,241,0.3)',
-                                }}>
-                                ✅ Guardar Avatar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // ==========================================
-        // DASHBOARD
-        // ==========================================
-        function Dashboard({ user, stats, onStartSession, onViewRewards, onViewParent, onCustomizeAvatar, onLogout }) {
-            const [showConfetti, setShowConfetti] = useState(false);
-            const pet = PETS.find(p => p.id === (user.pet || 'robot'));
-
-            const xpForLevel = user.level * 100;
-            const dailyStreak = stats.dailyStreak || 1;
-
-            return (
-                <div style={{
-                    minHeight: '100vh',
-                    background: 'linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #fef3f2 100%)',
-                    position: 'relative',
-                }}>
-                    <FloatingParticles count={10} />
-                    <Confetti active={showConfetti} />
-
-                    {/* Header */}
-                    <header style={{
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                        padding: '20px 24px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        position: 'sticky',
-                        top: 0,
-                        zIndex: 100,
-                        boxShadow: '0 4px 20px rgba(99,102,241,0.3)',
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div onClick={onCustomizeAvatar} style={{
-                                width: 44, height: 44, borderRadius: '50%',
-                                background: user.avatar?.color || '#3b82f6',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 22, cursor: 'pointer', border: '3px solid rgba(255,255,255,0.5)',
-                            }}>
-                                {AVATAR_ITEMS.hair.find(h => h.id === (user.avatar?.hair))?.icon || '😊'}
-                            </div>
-                            <div>
-                                <div style={{ color: '#fff', fontWeight: 800, fontSize: 16 }}>¡Hola, {user.name}! 👋</div>
-                                <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, fontWeight: 600 }}>
-                                    🔥 Racha: {dailyStreak} día{dailyStreak > 1 ? 's' : ''}
-                                </div>
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            <div style={{
-                                display: 'flex', alignItems: 'center', gap: 6,
-                                background: 'rgba(255,255,255,0.2)', borderRadius: 20, padding: '6px 14px',
-                            }}>
-                                <span>🪙</span>
-                                <span style={{ color: '#fff', fontWeight: 800, fontSize: 14 }}>{stats.totalCoins}</span>
-                            </div>
-                            <button onClick={onLogout} style={{
-                                background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff',
-                                borderRadius: 10, padding: '8px 12px', cursor: 'pointer', fontSize: 16,
-                            }}>🚪</button>
+                        <div style={{display:'flex', gap:12, alignItems:'center'}}>
+                            <span style={{fontWeight:800}}>{cfg.rewards.icon} {stats.coins}</span>
+                            <button onClick={onLogout} className="btn btn-outline" style={{padding:'8px 12px'}}>🚪</button>
                         </div>
                     </header>
 
-                    <div style={{ maxWidth: 800, margin: '0 auto', padding: '20px 16px 40px', position: 'relative', zIndex: 1 }}>
-
-                        {/* XP & Level */}
-                        <div className="card-hover" style={{
-                            background: '#fff', borderRadius: 20, padding: 20,
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.06)', marginBottom: 20,
-                            display: 'flex', alignItems: 'center', gap: 20,
-                        }}>
-                            <XPRing level={user.level} xp={stats.totalXP % xpForLevel} xpToNext={xpForLevel} size={70} />
-                            <div style={{ flex: 1 }}>
-                                <div style={{ fontWeight: 800, fontSize: 16, color: '#1e293b', marginBottom: 8 }}>
-                                    ⭐ {stats.totalXP} XP Total
-                                </div>
-                                <ProgressBar value={stats.totalXP % xpForLevel} max={xpForLevel} color="#6366f1" height={10} showLabel={false} />
-                                <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 4, fontWeight: 600 }}>
-                                    {xpForLevel - (stats.totalXP % xpForLevel)} XP para el nivel {user.level + 1}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Daily Challenge */}
-                        <div className="card-hover" style={{
-                            background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
-                            borderRadius: 20, padding: 18, marginBottom: 20,
-                            display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer',
-                            border: '2px solid #fbbf24',
-                        }} onClick={() => { SoundEngine.play('click'); onStartSession(true); }}>
-                            <div style={{ fontSize: 36 }}>🏆</div>
+                    <div className="card" style={{background:`linear-gradient(135deg, ${cfg.colors.primary}, ${cfg.colors.secondary})`, color:'#fff', marginBottom:20}}>
+                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                             <div>
-                                <div style={{ fontWeight: 800, color: '#92400e', fontSize: 15 }}>Reto Diario</div>
-                                <div style={{ color: '#a16207', fontSize: 13, fontWeight: 600 }}>
-                                    ¡Completa 10 ejercicios para ganar 50 monedas extra!
-                                </div>
+                                <div style={{fontSize:14, opacity:0.9}}>Nivel {stats.level}</div>
+                                <div style={{fontSize:32, fontWeight:900}}>{stats.xp} XP</div>
                             </div>
-                            <div style={{ marginLeft: 'auto', fontSize: 20, color: '#d97706' }}>→</div>
+                            <div style={{width:80, height:80, borderRadius:'50%', background:'rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:40}}>🏅</div>
                         </div>
+                        <div style={{marginTop:12, background:'rgba(255,255,255,0.3)', height:8, borderRadius:4}}>
+                            <div style={{width:`${(stats.xp % 100)}%`, height:'100%', background:'#fff', borderRadius:4, transition:'width 0.5s'}}></div>
+                        </div>
+                    </div>
 
-                        {/* Pet */}
-                        <div className="card-hover" style={{
-                            background: '#fff', borderRadius: 20, padding: 16, marginBottom: 20,
-                            boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
-                            display: 'flex', alignItems: 'center', gap: 14,
-                        }}>
-                            <PetDisplay pet={pet} size={60} />
-                            <div style={{ flex: 1 }}>
-                                <div style={{ fontWeight: 800, color: '#1e293b', fontSize: 15 }}>
-                                    Tu mascota: {pet.name} {pet.icon}
-                                </div>
-                                <div style={{ color: '#94a3b8', fontSize: 12, fontWeight: 600 }}>
-                                    ¡Sigue practicando para hacerla crecer! 🌱
-                                </div>
-                                <div style={{ marginTop: 6 }}>
-                                    <ProgressBar value={user.level} max={15} color={pet.color} height={6} showLabel={false} />
-                                </div>
+                    <button onClick={onPlay} className="btn btn-primary" style={{width:'100%', padding:'18px', fontSize:20, marginBottom:20, boxShadow:`0 8px 24px ${cfg.colors.primary}50`}}>
+                        🎮 Jugar Ahora
+                    </button>
+
+                    <h3 style={{fontSize:18, fontWeight:800, marginBottom:12}}>📊 Tu Progreso</h3>
+                    <div className="grid-2" style={{marginBottom:20}}>
+                        <div className="card" style={{textAlign:'center'}}>
+                            <div style={{fontSize:24}}>🎯</div>
+                            <div style={{fontSize:20, fontWeight:800}}>{stats.accuracy > 0 ? `${Math.round(stats.accuracy*100)}%` : '-'}</div>
+                            <div style={{fontSize:12, color:'#64748b'}}>Precisión</div>
+                        </div>
+                        <div className="card" style={{textAlign:'center'}}>
+                            <div style={{fontSize:24}}>🔥</div>
+                            <div style={{fontSize:20, fontWeight:800}}>{stats.streak}</div>
+                            <div style={{fontSize:12, color:'#64748b'}}>Racha actual</div>
+                        </div>
+                    </div>
+
+                    <h3 style={{fontSize:18, fontWeight:800, marginBottom:12}}>🧩 Juegos Disponibles</h3>
+                    <div className="grid-4">
+                        {cfg.games.map(g => (
+                            <div key={g} className="card" style={{textAlign:'center', cursor:'pointer', border:`2px solid ${cfg.colors.primary}20`}} onClick={onPlay}>
+                                <div style={{fontSize:32, marginBottom:6}}>{g==='counting'?'🔢':g==='shapes'?'🔺':g==='colors'?'🎨':g==='addsub'?'➕':g==='muldiv'?'✖️':g==='fractions'?'🥧':g==='algebra'?'🧮':'📝'}</div>
+                                <div style={{fontWeight:700, fontSize:14}}>{g.charAt(0).toUpperCase()+g.slice(1)}</div>
                             </div>
-                        </div>
-
-                        {/* Start Session Button */}
-                        <button onClick={() => { SoundEngine.play('click'); onStartSession(false); }}
-                            className="btn-press"
-                            style={{
-                                width: '100%', padding: '20px', borderRadius: 20, border: 'none',
-                                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                color: '#fff', fontSize: 20, fontWeight: 800, cursor: 'pointer',
-                                fontFamily: 'Nunito', marginBottom: 20,
-                                boxShadow: '0 10px 30px rgba(99,102,241,0.4)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                            }}>
-                            <span style={{ fontSize: 28 }}>🎮</span>
-                            ¡Empezar Sesión! (15 min)
-                        </button>
-
-                        {/* Exercise Categories */}
-                        <h3 style={{ fontSize: 18, fontWeight: 800, color: '#1e293b', marginBottom: 14 }}>
-                            📚 Categorías de Ejercicios
-                        </h3>
-                        <div style={{
-                            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-                            gap: 12, marginBottom: 24,
-                        }}>
-                            {MATH_TYPES.map((t, i) => {
-                                const count = stats.typeStats?.[t.id]?.count || 0;
-                                return (
-                                    <div key={t.id} className="card-hover btn-press"
-                                        onClick={() => { SoundEngine.play('click'); onStartSession(false, t.id); }}
-                                        style={{
-                                            background: '#fff', borderRadius: 16, padding: '16px 12px',
-                                            textAlign: 'center', cursor: 'pointer',
-                                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                                            animationDelay: `${i * 0.05}s`,
-                                            borderTop: `4px solid ${t.color}`,
-                                        }}>
-                                        <div style={{ fontSize: 32, marginBottom: 6 }}>{t.icon}</div>
-                                        <div style={{ fontWeight: 700, fontSize: 13, color: '#1e293b' }}>{t.label}</div>
-                                        <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600, marginTop: 4 }}>
-                                            {count} completados
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Quick Stats */}
-                        <h3 style={{ fontSize: 18, fontWeight: 800, color: '#1e293b', marginBottom: 14 }}>
-                            📊 Tu Progreso
-                        </h3>
-                        <div style={{
-                            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
-                            gap: 12, marginBottom: 24,
-                        }}>
-                            {[
-                                { label: 'Correctas', value: stats.totalCorrect, icon: '✅', color: '#10b981' },
-                                { label: 'Precisión', value: stats.totalAttempts > 0 ? `${Math.round((stats.totalCorrect / stats.totalAttempts) * 100)}%` : '0%', icon: '🎯', color: '#6366f1' },
-                                { label: 'Racha Máx', value: stats.bestStreak || 0, icon: '🔥', color: '#f59e0b' },
-                                { label: 'Tiempo Total', value: `${Math.round((stats.totalTime || 0) / 60)} min`, icon: '⏱️', color: '#ec4899' },
-                            ].map((s, i) => (
-                                <div key={i} className="card-hover" style={{
-                                    background: '#fff', borderRadius: 16, padding: '16px',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                                    display: 'flex', alignItems: 'center', gap: 12,
-                                }}>
-                                    <div style={{
-                                        width: 44, height: 44, borderRadius: 12,
-                                        background: `${s.color}15`,
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: 22,
-                                    }}>{s.icon}</div>
-                                    <div>
-                                        <div style={{ fontWeight: 800, fontSize: 18, color: '#1e293b' }}>{s.value}</div>
-                                        <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>{s.label}</div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Parent Panel Button */}
-                        {user.isParent && (
-                            <button onClick={onViewParent} className="btn-press"
-                                style={{
-                                    width: '100%', padding: '16px', borderRadius: 16, border: '2px solid #e2e8f0',
-                                    background: '#fff', color: '#64748b', fontSize: 16, fontWeight: 700,
-                                    cursor: 'pointer', fontFamily: 'Nunito', marginBottom: 12,
-                                }}>
-                                👨‍👩‍👧 Panel de Padres
-                            </button>
-                        )}
-
-                        <button onClick={onViewRewards} className="btn-press"
-                            style={{
-                                width: '100%', padding: '16px', borderRadius: 16, border: '2px solid #e2e8f0',
-                                background: '#fff', color: '#64748b', fontSize: 16, fontWeight: 700,
-                                cursor: 'pointer', fontFamily: 'Nunito',
-                            }}>
-                            🏅 Ver Recompensas y Logros
-                        </button>
+                        ))}
                     </div>
                 </div>
             );
         }
 
-        // ==========================================
-        // EXERCISE SESSION
-        // ==========================================
-        function ExerciseSession({ user, stats, onFinish, difficulty: initDiff }) {
-            const [currentQ, setCurrentQ] = useState(0);
-            const [difficulty, setDifficulty] = useState(initDiff || Math.max(1, Math.ceil(user.level / 2)));
-            const [selectedType, setSelectedType] = useState(null);
-            const [sessionStats, setSessionStats] = useState({ correct: 0, wrong: 0, total: 0, streak: 0, coins: 0, startTime: Date.now() });
-            const [selectedAnswer, setSelectedAnswer] = useState(null);
-            const [showFeedback, setShowFeedback] = useState(null);
-            const [problem, setProblem] = useState(null);
-            const [showConfetti, setShowConfetti] = useState(false);
-            const [timeLeft, setTimeLeft] = useState(900); // 15 minutes
-            const [sessionComplete, setSessionComplete] = useState(false);
-            const [adaptiveDifficulty, setAdaptiveDifficulty] = useState({});
-            const questionRef = useRef(null);
-
-            const totalQuestions = 15;
-
-            const generateNextProblem = useCallback(() => {
-                let type;
-                if (selectedType) {
-                    type = selectedType;
-                } else {
-                    type = pick(MATH_TYPES).id;
-                }
-                setProblem(generateProblem(type, difficulty));
-            }, [difficulty, selectedType]);
+        function GameSession({ ageGroup, difficulty, stats, onFinish, sound }) {
+            const cfg = AGE_CONFIG[ageGroup];
+            const [current, setCurrent] = useState(null);
+            const [session, setSession] = useState({ correct:0, total:0, start:Date.now(), type:cfg.games[0] });
+            const [selected, setSelected] = useState(null);
+            const [feedback, setFeedback] = useState(null);
+            const [time, setTime] = useState(0);
+            const timer = useRef();
 
             useEffect(() => {
-                if (currentQ < totalQuestions && !sessionComplete) {
-                    generateNextProblem();
-                }
-            }, [currentQ, generateNextProblem, sessionComplete]);
-
-            useEffect(() => {
-                const timer = setInterval(() => {
-                    setTimeLeft(t => {
-                        if (t <= 1) {
-                            setSessionComplete(true);
-                            return 0;
-                        }
-                        return t - 1;
-                    });
-                }, 1000);
-                return () => clearInterval(timer);
+                generate();
+                timer.current = setInterval(() => setTime(t => t+1), 1000);
+                return () => clearInterval(timer.current);
             }, []);
-
-            useEffect(() => {
-                if (sessionStats.correct >= totalQuestions) {
-                    setSessionComplete(true);
-                }
-            }, [sessionStats.correct]);
-
-            const handleAnswer = (answer) => {
-                if (showFeedback !== null) return;
-                setSelectedAnswer(answer);
-                const isCorrect = answer === problem.answer;
-                const timeTaken = (Date.now() - sessionStats.startTime) / 1000;
-
-                SoundEngine.play(isCorrect ? 'correct' : 'wrong');
-
-                if (isCorrect) {
-                    setShowConfetti(true);
-                    setTimeout(() => setShowConfetti(false), 2000);
-                }
-
-                setShowFeedback(isCorrect);
-
-                const xpGain = isCorrect ? (difficulty * 10 + (sessionStats.streak >= 3 ? 5 : 0)) : 2;
-                const coinGain = isCorrect ? (difficulty * 2 + (sessionStats.streak >= 5 ? 3 : 0)) : 0;
-
-                setSessionStats(s => ({
-                    ...s,
-                    correct: s.correct + (isCorrect ? 1 : 0),
-                    wrong: s.wrong + (isCorrect ? 0 : 1),
-                    total: s.total + 1,
-                    streak: isCorrect ? s.streak + 1 : 0,
-                    coins: s.coins + coinGain,
-                }));
-
-                // Adaptive difficulty
-                setAdaptiveDifficulty(d => {
-                    const key = problem.type;
-                    const newD = { ...d, [key]: { ...(d[key] || { correct: 0, total: 0 }), total: (d[key]?.total || 0) + 1, correct: (d[key]?.correct || 0) + (isCorrect ? 1 : 0) } };
-                    const typeStats = newD[key];
-                    if (typeStats.total >= 3) {
-                        const accuracy = typeStats.correct / typeStats.total;
-                        if (accuracy > 0.8 && difficulty < 10) setDifficulty(diff => Math.min(10, diff + 1));
-                        if (accuracy < 0.4 && difficulty > 1) setDifficulty(diff => Math.max(1, diff - 1));
-                    }
-                    return newD;
-                });
-
-                setTimeout(() => {
-                    setShowFeedback(null);
-                    setSelectedAnswer(null);
-                    setCurrentQ(c => c + 1);
-                }, 1200);
-            };
-
-            const endSession = () => {
-                const timeSpent = Math.round((Date.now() - sessionStats.startTime) / 1000);
-                onFinish({
-                    ...sessionStats,
-                    timeSpent,
-                    difficulty,
-                    total: Math.max(sessionStats.total, currentQ),
-                });
-            };
-
-            if (sessionComplete) {
-                const accuracy = sessionStats.total > 0 ? Math.round((sessionStats.correct / sessionStats.total) * 100) : 0;
-                const xpEarned = sessionStats.correct * difficulty * 10;
-                return (
-                    <div style={{
-                        minHeight: '100vh',
-                        background: 'linear-gradient(135deg, #f0f4ff, #faf5ff)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-                    }}>
-                        <Confetti active={true} />
-                        <div className="bounce-in" style={{
-                            background: '#fff', borderRadius: 24, padding: 32, maxWidth: 400, width: '100%',
-                            textAlign: 'center', boxShadow: '0 25px 60px rgba(0,0,0,0.12)',
-                        }}>
-                            <div style={{ fontSize: 64, marginBottom: 16, animation: 'float 2s ease-in-out infinite' }}>
-                                {accuracy >= 80 ? '🏆' : accuracy >= 50 ? '⭐' : '💪'}
-                            </div>
-                            <h2 style={{ fontSize: 28, fontWeight: 900, color: '#1e293b', marginBottom: 8 }}>
-                                {accuracy >= 80 ? '¡Increíble!' : accuracy >= 50 ? '¡Muy Bien!' : '¡Sigue Practicando!'}
-                            </h2>
-                            <p style={{ color: '#64748b', fontWeight: 600, marginBottom: 24 }}>
-                                Sesión completada
-                            </p>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-                                {[
-                                    { label: 'Correctas', value: `${sessionStats.correct}/${sessionStats.total}`, icon: '✅' },
-                                    { label: 'Precisión', value: `${accuracy}%`, icon: '🎯' },
-                                    { label: 'XP Ganados', value: `+${xpEarned}`, icon: '⭐' },
-                                    { label: 'Monedas', value: `+${sessionStats.coins}`, icon: '🪙' },
-                                ].map((s, i) => (
-                                    <div key={i} style={{
-                                        background: '#f8fafc', borderRadius: 14, padding: 14,
-                                    }}>
-                                        <div style={{ fontSize: 24 }}>{s.icon}</div>
-                                        <div style={{ fontWeight: 800, fontSize: 18, color: '#1e293b' }}>{s.value}</div>
-                                        <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{s.label}</div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <button onClick={endSession} className="btn-press"
-                                style={{
-                                    width: '100%', padding: '16px', borderRadius: 16, border: 'none',
-                                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                    color: '#fff', fontSize: 17, fontWeight: 800, cursor: 'pointer',
-                                    fontFamily: 'Nunito', boxShadow: '0 8px 25px rgba(99,102,241,0.4)',
-                                }}>
-                                🏠 Volver al Inicio
-                            </button>
-                        </div>
-                    </div>
-                );
-            }
-
-            const mins = Math.floor(timeLeft / 60);
-            const secs = timeLeft % 60;
-
-            return (
-                <div style={{
-                    minHeight: '100vh',
-                    background: 'linear-gradient(135deg, #f0f4ff, #faf5ff)',
-                    display: 'flex', flexDirection: 'column',
-                }}>
-                    <Confetti active={showConfetti} />
-
-                    {/* Session Header */}
-                    <div style={{
-                        background: '#fff', padding: '12px 20px',
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                    }}>
-                        <button onClick={endSession} style={{
-                            background: '#f1f5f9', border: 'none', borderRadius: 10,
-                            padding: '8px 14px', cursor: 'pointer', fontWeight: 700,
-                            color: '#64748b', fontSize: 13, fontFamily: 'Nunito',
-                        }}>✕ Salir</button>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                <span>🔥</span>
-                                <span style={{ fontWeight: 800, color: '#f59e0b', fontSize: 14 }}>{sessionStats.streak}</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                <span>🪙</span>
-                                <span style={{ fontWeight: 800, color: '#6366f1', fontSize: 14 }}>{sessionStats.coins}</span>
-                            </div>
-                        </div>
-
-                        <div style={{
-                            background: timeLeft < 60 ? '#fef2f2' : '#f0fdf4',
-                            borderRadius: 10, padding: '6px 14px',
-                            fontWeight: 800, fontSize: 14,
-                            color: timeLeft < 60 ? '#ef4444' : '#22c55e',
-                        }}>
-                            ⏱️ {mins}:{secs.toString().padStart(2, '0')}
-                        </div>
-                    </div>
-
-                    {/* Progress */}
-                    <div style={{ padding: '8px 20px', background: '#fff' }}>
-                        <ProgressBar value={currentQ} max={totalQuestions} color="#6366f1" height={8} showLabel={false} />
-                    </div>
-
-                    {/* Question */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 20, maxWidth: 600, margin: '0 auto', width: '100%' }}>
-                        <div className={`slide-up ${showFeedback === false ? 'shake' : ''}`} style={{
-                            width: '100%', marginBottom: 30, textAlign: 'center',
-                        }}>
-                            <div style={{
-                                display: 'inline-flex', alignItems: 'center', gap: 6,
-                                background: problem ? `${MATH_TYPES.find(t => t.id === problem.type)?.color}15` : '#f1f5f9',
-                                borderRadius: 20, padding: '6px 16px', marginBottom: 16,
-                            }}>
-                                <span style={{ fontSize: 16 }}>{problem ? MATH_TYPES.find(t => t.id === problem.type)?.icon : ''}</span>
-                                <span style={{ fontWeight: 700, fontSize: 13, color: problem ? MATH_TYPES.find(t => t.id === problem.type)?.color : '#64748b' }}>
-                                    Pregunta {currentQ + 1} de {totalQuestions}
-                                </span>
-                            </div>
-                            <div style={{
-                                fontSize: 32, fontWeight: 800, color: '#1e293b',
-                                padding: '20px 30px', background: '#fff', borderRadius: 20,
-                                boxShadow: '0 4px 15px rgba(0,0,0,0.06)',
-                                lineHeight: 1.4,
-                            }}>
-                                {problem?.question}
-                            </div>
-                        </div>
-
-                        {/* Answers */}
-                        <div style={{
-                            display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12,
-                            width: '100%', maxWidth: 400,
-                        }}>
-                            {problem?.options.map((opt, i) => {
-                                const isSelected = selectedAnswer === opt;
-                                const isCorrect = opt === problem.answer;
-                                const showResult = showFeedback !== null;
-
-                                let bgColor = '#fff';
-                                let borderColor = '#e2e8f0';
-                                let textColor = '#1e293b';
-
-                                if (showResult) {
-                                    if (isCorrect) { bgColor = '#dcfce7'; borderColor = '#22c55e'; textColor = '#166534'; }
-                                    else if (isSelected) { bgColor = '#fef2f2'; borderColor = '#ef4444'; textColor = '#991b1b'; }
-                                }
-
-                                return (
-                                    <button key={i} className="btn-press"
-                                        onClick={() => handleAnswer(opt)}
-                                        disabled={showFeedback !== null}
-                                        style={{
-                                            padding: '18px', borderRadius: 16,
-                                            border: `3px solid ${borderColor}`,
-                                            background: bgColor,
-                                            color: textColor,
-                                            fontSize: 22, fontWeight: 800,
-                                            cursor: showFeedback !== null ? 'default' : 'pointer',
-                                            fontFamily: 'Nunito',
-                                            transition: 'all 0.3s',
-                                            transform: isSelected ? 'scale(0.95)' : 'scale(1)',
-                                        }}>
-                                        {opt}
-                                        {showResult && isCorrect && <span style={{ marginLeft: 8 }}>✓</span>}
-                                        {showResult && isSelected && !isCorrect && <span style={{ marginLeft: 8 }}>✗</span>}
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                        {/* Feedback Message */}
-                        {showFeedback !== null && (
-                            <div className="pop-in" style={{
-                                marginTop: 20, padding: '12px 24px', borderRadius: 14,
-                                background: showFeedback ? '#dcfce7' : '#fef2f2',
-                                fontWeight: 700, fontSize: 16,
-                                color: showFeedback ? '#166534' : '#991b1b',
-                            }}>
-                                {showFeedback ? '¡Correcto! 🎉' : `La respuesta era ${problem.answer} 💪`}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
-        }
-
-        // ==========================================
-        // REWARDS SCREEN
-        // ==========================================
-        function RewardsScreen({ stats, user, onClose }) {
-            const unlockedPets = PETS.filter(p => user.level >= p.unlockLevel);
-            const unlockedAchievements = ACHIEVEMENTS.filter(a => a.condition(stats));
-
-            return (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000, padding: 20,
-                }} onClick={onClose}>
-                    <div style={{
-                        background: '#fff', borderRadius: 24, padding: 28, maxWidth: 500, width: '100%',
-                        maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.2)',
-                    }} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                            <h2 style={{ fontSize: 24, fontWeight: 800 }}>🏅 Recompensas</h2>
-                            <button onClick={onClose} style={{
-                                background: '#f1f5f9', border: 'none', borderRadius: 10,
-                                width: 36, height: 36, cursor: 'pointer', fontSize: 16,
-                            }}>✕</button>
-                        </div>
-
-                        {/* Stats Overview */}
-                        <div style={{
-                            display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24,
-                        }}>
-                            {[
-                                { label: 'Monedas', value: stats.totalCoins, icon: '🪙', bg: '#fef3c7' },
-                                { label: 'Estrellas', value: Math.floor(stats.totalXP / 50), icon: '⭐', bg: '#dbeafe' },
-                                { label: 'Nivel', value: user.level, icon: '🎖️', bg: '#ede9fe' },
-                            ].map((s, i) => (
-                                <div key={i} style={{
-                                    background: s.bg, borderRadius: 16, padding: 14, textAlign: 'center',
-                                }}>
-                                    <div style={{ fontSize: 28 }}>{s.icon}</div>
-                                    <div style={{ fontWeight: 800, fontSize: 20, color: '#1e293b' }}>{s.value}</div>
-                                    <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>{s.label}</div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Achievements */}
-                        <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 12 }}>🏆 Logros</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 24 }}>
-                            {ACHIEVEMENTS.map(a => {
-                                const unlocked = unlockedAchievements.includes(a);
-                                return (
-                                    <div key={a.id} style={{
-                                        background: unlocked ? '#f0fdf4' : '#f8fafc',
-                                        border: `2px solid ${unlocked ? '#86efac' : '#e2e8f0'}`,
-                                        borderRadius: 14, padding: 12, textAlign: 'center',
-                                        opacity: unlocked ? 1 : 0.5,
-                                    }}>
-                                        <div style={{ fontSize: 28 }}>{a.icon}</div>
-                                        <div style={{ fontWeight: 700, fontSize: 12, color: '#1e293b', marginTop: 4 }}>{a.name}</div>
-                                        <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2 }}>{a.desc}</div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Pets */}
-                        <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 12 }}>🐾 Mascotas</h3>
-                        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                            {PETS.map(p => {
-                                const unlocked = user.level >= p.unlockLevel;
-                                return (
-                                    <div key={p.id} style={{
-                                        background: unlocked ? p.color + '15' : '#f8fafc',
-                                        border: `2px solid ${unlocked ? p.color : '#e2e8f0'}`,
-                                        borderRadius: 14, padding: '12px 16px', textAlign: 'center',
-                                        opacity: unlocked ? 1 : 0.4,
-                                        minWidth: 80,
-                                    }}>
-                                        <div style={{ fontSize: 32 }}>{p.icon}</div>
-                                        <div style={{ fontWeight: 700, fontSize: 12, color: '#1e293b' }}>{p.name}</div>
-                                        <div style={{ fontSize: 10, color: '#94a3b8' }}>
-                                            {unlocked ? '✅ Desbloqueada' : `Nivel ${p.unlockLevel}`}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // ==========================================
-        // PARENT PANEL
-        // ==========================================
-        function ParentPanel({ stats, user, onClose }) {
-            const accuracy = stats.totalAttempts > 0 ? Math.round((stats.totalCorrect / stats.totalAttempts) * 100) : 0;
-            const todayMinutes = Math.round((stats.todayTime || 0) / 60);
-
-            return (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000, padding: 20,
-                }} onClick={onClose}>
-                    <div style={{
-                        background: '#fff', borderRadius: 24, padding: 28, maxWidth: 600, width: '100%',
-                        maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 25px 60px rgba(0,0,0,0.2)',
-                    }} onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                            <h2 style={{ fontSize: 24, fontWeight: 800 }}>👨‍👩‍👧 Panel de Padres</h2>
-                            <button onClick={onClose} style={{
-                                background: '#f1f5f9', border: 'none', borderRadius: 10,
-                                width: 36, height: 36, cursor: 'pointer', fontSize: 16,
-                            }}>✕</button>
-                        </div>
-
-                        <p style={{ color: '#64748b', fontSize: 14, marginBottom: 20, fontWeight: 600 }}>
-                            Progreso de <strong>{user.name}</strong>
-                        </p>
-
-                        {/* Key Metrics */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 24 }}>
-                            {[
-                                { label: 'Tiempo Hoy', value: `${todayMinutes} min`, icon: '⏱️', color: '#6366f1' },
-                                { label: 'Precisión General', value: `${accuracy}%`, icon: '🎯', color: '#10b981' },
-                                { label: 'Nivel Actual', value: user.level, icon: '📊', color: '#f59e0b' },
-                                { label: 'Total Ejercicios', value: stats.totalAttempts || 0, icon: '📝', color: '#ec4899' },
-                            ].map((m, i) => (
-                                <div key={i} style={{
-                                    background: '#f8fafc', borderRadius: 16, padding: 16,
-                                    borderLeft: `4px solid ${m.color}`,
-                                }}>
-                                    <div style={{ fontSize: 20, marginBottom: 4 }}>{m.icon}</div>
-                                    <div style={{ fontWeight: 800, fontSize: 22, color: '#1e293b' }}>{m.value}</div>
-                                    <div style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>{m.label}</div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* Type Performance */}
-                        <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 12 }}>📈 Rendimiento por Categoría</h3>
-                        <div style={{ marginBottom: 24 }}>
-                            {MATH_TYPES.map(t => {
-                                const typeStats = stats.typeStats?.[t.id] || {};
-                                const typeAccuracy = typeStats.total > 0 ? Math.round((typeStats.correct / typeStats.total) * 100) : 0;
-                                return (
-                                    <div key={t.id} style={{ marginBottom: 12 }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                                            <span style={{ fontWeight: 700, fontSize: 13, color: '#1e293b' }}>
-                                                {t.icon} {t.label}
-                                            </span>
-                                            <span style={{ fontWeight: 700, fontSize: 13, color: typeAccuracy >= 70 ? '#10b981' : typeAccuracy >= 40 ? '#f59e0b' : '#ef4444' }}>
-                                                {typeAccuracy}% ({typeStats.total || 0} intentos)
-                                            </span>
-                                        </div>
-                                        <ProgressBar value={typeStats.correct || 0} max={typeStats.total || 1} color={t.color} height={8} showLabel={false} />
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Weekly Activity */}
-                        <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 12 }}>📅 Actividad Semanal</h3>
-                        <div style={{ display: 'flex', gap: 8, marginBottom: 24, justifyContent: 'space-between' }}>
-                            {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map((day, i) => {
-                                const active = [true, true, false, true, true, false, true][i];
-                                return (
-                                    <div key={day} style={{
-                                        width: 40, height: 60, borderRadius: 10,
-                                        background: active ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#f1f5f9',
-                                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                                        gap: 4,
-                                    }}>
-                                        <span style={{ fontSize: 11, fontWeight: 700, color: active ? '#fff' : '#94a3b8' }}>{day}</span>
-                                        <span style={{ fontSize: 10, fontWeight: 700, color: active ? '#fff' : '#cbd5e1' }}>
-                                            {active ? '✓' : '—'}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {/* Recommendations */}
-                        <div style={{
-                            background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
-                            borderRadius: 16, padding: 16, border: '2px solid #fbbf24',
-                        }}>
-                            <h4 style={{ fontSize: 14, fontWeight: 800, color: '#92400e', marginBottom: 8 }}>💡 Recomendación</h4>
-                            <p style={{ fontSize: 13, color: '#a16207', fontWeight: 600, lineHeight: 1.5 }}>
-                                {accuracy >= 70
-                                    ? `${user.name} está teniendo un excelente rendimiento. ¡Sigan así! Consideren explorar categorías más avanzadas.`
-                                    : accuracy >= 40
-                                    ? `${user.name} va por buen camino. Practicar un poco más en las categorías con menor porcentaje ayudará a mejorar.`
-                                    : `${user.name} necesita más práctica. Intenten sesiones más cortas pero frecuentes. ¡El progreso tomará su tiempo!`}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // ==========================================
-        // MINI-GAME (Quick Math Race)
-        // ==========================================
-        function MiniGame({ onClose, onReward }) {
-            const [score, setScore] = useState(0);
-            const [timeLeft, setTimeLeft] = useState(30);
-            const [problem, setProblem] = useState(null);
-            const [started, setStarted] = useState(false);
-            const [finished, setFinished] = useState(false);
 
             const generate = () => {
-                const a = rand(1, 12);
-                const b = rand(1, 12);
-                const ops = ['+', '-', '×'];
-                const op = pick(ops);
-                let ans;
-                switch(op) {
-                    case '+': ans = a + b; break;
-                    case '-': ans = Math.abs(a - b); break;
-                    case '×': ans = a * b; break;
-                }
-                setProblem({ text: `${a} ${op} ${b}`, answer: ans });
+                const type = cfg.games[Math.floor(Math.random()*cfg.games.length)];
+                const qGen = QuestionGenerator[type] || QuestionGenerator.default;
+                setCurrent({ ...qGen(difficulty), type });
             };
-
-            useEffect(() => {
-                if (started && !finished) generate();
-            }, [started, finished]);
-
-            useEffect(() => {
-                if (!started || finished) return;
-                const t = setInterval(() => {
-                    setTimeLeft(prev => {
-                        if (prev <= 1) { setFinished(true); return 0; }
-                        return prev - 1;
-                    });
-                }, 1000);
-                return () => clearInterval(t);
-            }, [started, finished]);
 
             const handleAnswer = (val) => {
-                if (val === problem.answer) {
-                    SoundEngine.play('correct');
-                    setScore(s => s + 1);
-                    generate();
-                } else {
-                    SoundEngine.play('wrong');
-                    setTimeLeft(t => Math.max(0, t - 2));
-                }
+                if(feedback) return;
+                setSelected(val);
+                const isCorrect = String(val) === String(current.ans);
+                sound.play(isCorrect ? 'correct' : 'wrong');
+                setFeedback(isCorrect ? '🎉 ¡Correcto!' : '💪 ¡Casi!');
+                setSession(s => ({ ...s, correct: s.correct + (isCorrect?1:0), total: s.total+1 }));
+                setTimeout(() => {
+                    if(session.total + 1 >= 10) {
+                        clearInterval(timer.current);
+                        onFinish(session.correct + (isCorrect?1:0), session.total + 1, time, session.type);
+                    } else {
+                        setFeedback(null); setSelected(null); generate();
+                    }
+                }, 1000);
             };
 
-            if (finished) {
-                onReward(score);
-                return (
-                    <div style={{
-                        position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-                    }}>
-                        <Confetti active={score > 5} />
-                        <div className="bounce-in" style={{
-                            background: '#fff', borderRadius: 24, padding: 32, maxWidth: 350, width: '100%',
-                            textAlign: 'center',
-                        }}>
-                            <div style={{ fontSize: 64, marginBottom: 16 }}>🏁</div>
-                            <h2 style={{ fontSize: 28, fontWeight: 900, color: '#1e293b' }}>¡Tiempo!</h2>
-                            <div style={{ fontSize: 48, fontWeight: 900, color: '#6366f1', margin: '16px 0' }}>{score}</div>
-                            <p style={{ color: '#64748b', fontWeight: 600 }}>Respuestas correctas</p>
-                            <p style={{ color: '#f59e0b', fontWeight: 800, marginTop: 8 }}>
-                                +{score * 5} 🪙 monedas ganadas
-                            </p>
-                            <button onClick={onClose} className="btn-press" style={{
-                                marginTop: 20, padding: '14px 32px', borderRadius: 14, border: 'none',
-                                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer',
-                                fontFamily: 'Nunito',
-                            }}>Volver</button>
-                        </div>
-                    </div>
-                );
-            }
-
-            if (!started) {
-                return (
-                    <div style={{
-                        position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                        background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-                    }} onClick={onClose}>
-                        <div style={{
-                            background: '#fff', borderRadius: 24, padding: 32, maxWidth: 400, width: '100%',
-                            textAlign: 'center',
-                        }} onClick={e => e.stopPropagation()}>
-                            <div style={{ fontSize: 64, marginBottom: 16 }}>⚡</div>
-                            <h2 style={{ fontSize: 28, fontWeight: 900, color: '#1e293b', marginBottom: 8 }}>Carrera Matemática</h2>
-                            <p style={{ color: '#64748b', fontWeight: 600, marginBottom: 24 }}>
-                                ¡Resuelve el mayor número de operaciones en 30 segundos!
-                            </p>
-                            <div style={{ display: 'flex', gap: 10 }}>
-                                <button onClick={onClose} style={{
-                                    flex: 1, padding: '14px', borderRadius: 14, border: '2px solid #e2e8f0',
-                                    background: '#fff', color: '#64748b', fontWeight: 700, fontSize: 15,
-                                    cursor: 'pointer', fontFamily: 'Nunito',
-                                }}>Cancelar</button>
-                                <button onClick={() => setStarted(true)} className="btn-press" style={{
-                                    flex: 2, padding: '14px', borderRadius: 14, border: 'none',
-                                    background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                                    color: '#fff', fontSize: 16, fontWeight: 800, cursor: 'pointer',
-                                    fontFamily: 'Nunito',
-                                    boxShadow: '0 4px 15px rgba(99,102,241,0.3)',
-                                }}>¡Jugar!</button>
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
-
             return (
-                <div style={{
-                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                }}>
-                    <div style={{
-                        position: 'absolute', top: 16, left: 16, right: 16,
-                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    }}>
-                        <button onClick={onClose} style={{
-                            background: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: 10,
-                            padding: '8px 14px', cursor: 'pointer', fontWeight: 700, fontSize: 13,
-                        }}>✕ Salir</button>
-                        <div style={{ display: 'flex', gap: 16 }}>
-                            <span style={{ fontWeight: 800, color: '#92400e' }}>⭐ {score}</span>
-                            <span style={{ fontWeight: 800, color: timeLeft < 10 ? '#ef4444' : '#92400e' }}>⏱️ {timeLeft}s</span>
-                        </div>
+                <div style={{maxWidth:600, margin:'0 auto', padding:20, textAlign:'center'}}>
+                    <div style={{display:'flex', justifyContent:'space-between', marginBottom:20}}>
+                        <button className="btn btn-outline" style={{padding:'8px 12px'}} onClick={()=>onFinish(session.correct, session.total, time, session.type)}>✕ Salir</button>
+                        <div style={{fontWeight:800}}>⏱️ {Math.floor(time/60)}:{(time%60).toString().padStart(2,'0')}</div>
                     </div>
 
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{
-                            fontSize: 40, fontWeight: 900, color: '#1e293b',
-                            padding: '20px 40px', background: 'rgba(255,255,255,0.8)',
-                            borderRadius: 20, marginBottom: 24,
-                        }}>
-                            {problem?.text} = ?
-                        </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, maxWidth: 300 }}>
-                            {(() => {
-                                const opts = [problem?.answer];
-                                while(opts.length < 4) {
-                                    const w = problem.answer + rand(-10, 10);
-                                    if(!opts.includes(w) && w >= 0) opts.push(w);
-                                }
-                                opts.sort(() => Math.random() - 0.5);
-                                return opts.map((o, i) => (
-                                    <button key={i} className="btn-press" onClick={() => handleAnswer(o)}
-                                        style={{
-                                            padding: '16px', borderRadius: 14, border: '3px solid rgba(255,255,255,0.8)',
-                                            background: '#fff', fontSize: 24, fontWeight: 800, cursor: 'pointer',
-                                            fontFamily: 'Nunito', color: '#1e293b',
-                                            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                                        }}>{o}</button>
-                                ));
-                            })()}
-                        </div>
+                    <div className="card pop" style={{minHeight:200, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', background:'#fff', marginBottom:20}}>
+                        <div style={{fontSize:14, color:cfg.colors.primary, fontWeight:700, marginBottom:8, textTransform:'uppercase'}}>{current?.type}</div>
+                        <div style={{fontSize:24, fontWeight:800, marginBottom:12, whiteSpace:'pre-wrap'}}>{current?.q}</div>
+                        <div dangerouslySetInnerHTML={{__html: current?.visual || ''}} style={{marginBottom:12, fontSize: ageGroup==='4-5'?'32px':'20px'}} />
                     </div>
+
+                    <div className="grid-2" style={{marginBottom:16}}>
+                        {current?.opts.map((opt, i) => (
+                            <button key={i} className="btn" style={{
+                                padding: ageGroup==='4-5'?'24px':'16px', fontSize: ageGroup==='4-5'?'22px':'18px',
+                                background: selected===opt ? (feedback?.includes('🎉')?'#dcfce7':'#fef2f2') : '#fff',
+                                border: `3px solid ${selected===opt ? (feedback?.includes('🎉')?'#22c55e':'#ef4444') : '#e2e8f0'}`,
+                                color: selected===opt ? (feedback?.includes('🎉')?'#166534':'#991b1b') : '#1e293b',
+                                transform: selected===opt ? 'scale(0.95)' : '1'
+                            }} onClick={()=>handleAnswer(opt)} disabled={!!feedback}>
+                                {opt}
+                            </button>
+                        ))}
+                    </div>
+                    {feedback && <div className={`pop ${feedback.includes('💪')?'shake':''}`} style={{padding:12, borderRadius:12, background:feedback.includes('🎉')?'#dcfce7':'#fef2f2', fontWeight:700, fontSize:16}}>{feedback}</div>}
                 </div>
             );
         }
 
-        // ==========================================
-        // MAIN APP
-        // ==========================================
-        function App() {
-            const [user, setUser] = useState(null);
-            const [screen, setScreen] = useState('login'); // login, dashboard, exercise, rewards, parent, minigame
-            const [stats, setStats] = useState({
-                totalXP: 0, totalCoins: 0, totalCorrect: 0, totalWrong: 0,
-                totalAttempts: 0, bestStreak: 0, dailyStreak: 1,
-                totalTime: 0, todayTime: 0, perfectSessions: 0,
-                fastAnswers: 0, typesPracticed: new Set(),
-                typeStats: {},
-            });
-            const [avatar, setAvatar] = useState({ hair: 'hair1', color: 'blue', accessory: 'none' });
-            const [showAvatarCustomizer, setShowAvatarCustomizer] = useState(false);
-
-            // Load from localStorage
-            useEffect(() => {
-                try {
-                    const saved = localStorage.getItem('mathquest_user');
-                    if (saved) {
-                        const data = JSON.parse(saved);
-                        if (data.user) setUser(data.user);
-                        if (data.stats) {
-                            setStats(s => ({ ...s, ...data.stats, typesPracticed: new Set(data.stats.typesPracticed || []) }));
-                        }
-                        if (data.avatar) setAvatar(data.avatar);
-                    }
-                } catch(e) {}
-            }, []);
-
-            // Save to localStorage
-            useEffect(() => {
-                if (user) {
-                    localStorage.setItem('mathquest_user', JSON.stringify({
-                        user, stats: { ...stats, typesPracticed: [...stats.typesPracticed] }, avatar,
-                    }));
-                }
-            }, [user, stats, avatar]);
-
-            const handleLogin = (loginData) => {
-                const existing = localStorage.getItem('mathquest_user');
-                if (existing) {
-                    const data = JSON.parse(existing);
-                    setUser({ ...data.user, name: loginData.name, isParent: loginData.isParent });
-                    setStats(s => ({ ...s, ...data.stats, typesPracticed: new Set(data.stats?.typesPracticed || []) }));
-                    setAvatar(data.avatar || avatar);
-                } else {
-                    setUser({ name: loginData.name, isParent: loginData.isParent, level: 1, pet: 'robot', avatar });
-                }
-                setScreen('dashboard');
-            };
-
-            const handleFinishSession = (sessionStats) => {
-                const xpGain = sessionStats.correct * 10;
-                const accuracy = sessionStats.total > 0 ? sessionStats.correct / sessionStats.total : 0;
-
-                setStats(s => {
-                    const newTypes = new Set(s.typesPracticed);
-                    // Track type stats
-                    const newTypeStats = { ...s.typeStats };
-                    const type = MATH_TYPES.find(t => t.id === (sessionStats.type || 'suma'));
-
-                    newTypes.add(type?.id || 'suma');
-                    if (!newTypeStats[type?.id || 'suma']) newTypeStats[type?.id || 'suma'] = { correct: 0, total: 0 };
-                    newTypeStats[type?.id || 'suma'].correct += sessionStats.correct;
-                    newTypeStats[type?.id || 'suma'].total += sessionStats.total;
-
-                    const newTotalXP = s.totalXP + xpGain;
-                    const newLevel = Math.floor(newTotalXP / 100) + 1;
-
-                    return {
-                        ...s,
-                        totalXP: newTotalXP,
-                        totalCoins: s.totalCoins + sessionStats.coins,
-                        totalCorrect: s.totalCorrect + sessionStats.correct,
-                        totalWrong: s.totalWrong + sessionStats.wrong,
-                        totalAttempts: s.totalAttempts + sessionStats.total,
-                        bestStreak: Math.max(s.bestStreak, sessionStats.streak),
-                        totalTime: s.totalTime + sessionStats.timeSpent,
-                        todayTime: (s.todayTime || 0) + sessionStats.timeSpent,
-                        perfectSessions: s.perfectSessions + (accuracy === 1 ? 1 : 0),
-                        fastAnswers: s.fastAnswers + (sessionStats.timeSpent / sessionStats.total < 5 ? 1 : 0),
-                        typesPracticed: newTypes,
-                        typeStats: newTypeStats,
-                    };
-                });
-
-                setUser(u => ({
-                    ...u,
-                    level: Math.floor((u.level === 1 ? 0 : (stats.totalXP / 100)) + (sessionStats.correct * 10 / 100)) + 1,
-                }));
-
-                SoundEngine.play('levelup');
-                setScreen('dashboard');
-            };
-
-            const handleMiniGameReward = (score) => {
-                const coins = score * 5;
-                const xp = score * 10;
-                setStats(s => ({
-                    ...s,
-                    totalCoins: s.totalCoins + coins,
-                    totalXP: s.totalXP + xp,
-                    totalCorrect: s.totalCorrect + score,
-                    totalAttempts: s.totalAttempts + score,
-                }));
-            };
-
-            if (!user) {
-                return <LoginScreen onLogin={handleLogin} />;
-            }
-
-            return (
-                <>
-                    {screen === 'dashboard' && (
-                        <Dashboard
-                            user={user} stats={stats}
-                            onStartSession={(isDaily, type) => setScreen('exercise')}
-                            onViewRewards={() => setScreen('rewards')}
-                            onViewParent={() => setScreen('parent')}
-                            onCustomizeAvatar={() => setShowAvatarCustomizer(true)}
-                            onLogout={() => { setUser(null); setScreen('login'); }}
-                        />
-                    )}
-
-                    {screen === 'exercise' && (
-                        <ExerciseSession
-                            user={user} stats={stats}
-                            onFinish={handleFinishSession}
-                        />
-                    )}
-
-                    {screen === 'rewards' && (
-                        <>
-                            <Dashboard
-                                user={user} stats={stats}
-                                onStartSession={() => setScreen('exercise')}
-                                onViewRewards={() => {}}
-                                onViewParent={() => setScreen('parent')}
-                                onCustomizeAvatar={() => setShowAvatarCustomizer(true)}
-                                onLogout={() => { setUser(null); setScreen('login'); }}
-                            />
-                            <RewardsScreen stats={stats} user={user} onClose={() => setScreen('dashboard')} />
-                        </>
-                    )}
-
-                    {screen === 'parent' && (
-                        <>
-                            <Dashboard
-                                user={user} stats={stats}
-                                onStartSession={() => setScreen('exercise')}
-                                onViewRewards={() => setScreen('rewards')}
-                                onViewParent={() => {}}
-                                onCustomizeAvatar={() => setShowAvatarCustomizer(true)}
-                                onLogout={() => { setUser(null); setScreen('login'); }}
-                            />
-                            <ParentPanel stats={stats} user={user} onClose={() => setScreen('dashboard')} />
-                        </>
-                    )}
-
-                    {screen === 'minigame' && (
-                        <MiniGame
-                            onClose={() => setScreen('dashboard')}
-                            onReward={handleMiniGameReward}
-                        />
-                    )}
-
-                    {showAvatarCustomizer && (
-                        <AvatarCustomizer
-                            avatar={avatar}
-                            onSave={setAvatar}
-                            onClose={() => setShowAvatarCustomizer(false)}
-                        />
-                    )}
-                </>
-            );
-        }
-
-        // Render
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
